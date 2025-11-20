@@ -1,0 +1,56 @@
+.glass-effect {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.parallax-bg {
+  background-attachment: fixed;
+}
+
+.bg-hero {
+  background-image: url('https://picsum.photos/seed/picsum/1920/1080');
+}
+
+html {
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Evita que las secciones ancladas queden tapadas por el header sticky */
+section {
+  scroll-margin-top: 96px;
+}
+
+.skill-icon {
+  filter: grayscale(100%);
+  transition: all 0.3s ease;
+}
+
+.skill-icon:hover {
+  filter: grayscale(0%);
+  transform: translateY(-8px);
+}
+
+/* Estilos para el ícono de GitHub en el footer */
+footer a {
+  display: inline-block;
+}
+
+footer a svg,
+footer a img {
+  fill: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+}
+
+footer a:hover svg,
+footer a:hover img {
+  fill: #ffffff;
+  filter: brightness(100%);
+}
