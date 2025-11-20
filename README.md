@@ -2,8 +2,6 @@
 
 Este es mi portafolio personal, diseñado para mostrar mis proyectos, habilidades y experiencia como desarrollador. Está construido con tecnologías web modernas, enfocándose en un diseño limpio, responsivo y una experiencia de usuario fluida.
 
-![Portfolio Preview](img/background/screen.png)
-
 ## 🚀 Características
 
 -   **Integración con GitHub API**: Carga dinámicamente mis repositorios destacados y sus lenguajes directamente desde GitHub.
