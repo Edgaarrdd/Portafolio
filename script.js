@@ -6,11 +6,11 @@ const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hora en milisegundos
 // Funciones de caché, para evitar sobrecargar la API de GitHub
 function getCachedData() {
   try {
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cached = localStorage.getItem(CACHE_KEY); // Obtiene datos del localStorage
     if (!cached) return null;
     const { data, timestamp } = JSON.parse(cached);
     if (Date.now() - timestamp > CACHE_EXPIRY) {
-      localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_KEY); // Elimina datos del localStorage
       return null;
     }
     return data;
@@ -21,7 +21,7 @@ function getCachedData() {
 // Función para guardar datos en caché
 function setCachedData(data) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ //stringify convierte el objeto a string
       data,
       timestamp: Date.now(),
     }));
@@ -75,7 +75,7 @@ async function fetchRepoLanguages(fullName) {
   });
   if (!response.ok) return [];
   const data = await response.json();
-  return Object.keys(data);
+  return Object.keys(data); // object.keys() devuelve un array con las claves del objeto
 }
 
 // Lista de repos destacados.
@@ -209,20 +209,15 @@ function handleNavScroll() {
   const nav = document.getElementById('main-nav');
   if (!nav) return;
 
-  if (window.scrollY > 50) {
-    // Mostrar nav
-    nav.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
-  } else {
-    // Ocultar nav
-    nav.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
-  }
-}
+  // Selecciona el método 'add' si window.scrollY <= 50, o 'remove' si no
+  const action = window.scrollY <= 50 ? 'add' : 'remove';
 
+  // Aplica el método seleccionado (add o remove) a la lista de clases
+  nav.classList[action]('opacity-0', '-translate-y-full', 'pointer-events-none');
+}
+// Evento para cargar proyectos al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
   initProjects();
-
-  // Inicializar estado del nav
   handleNavScroll();
-  // Agregar listener de scroll
   window.addEventListener('scroll', handleNavScroll);
 });
