@@ -1,5 +1,5 @@
 
-const GITHUB_USERNAME = 'Edgaarrdd'; 
+const GITHUB_USERNAME = 'Edgaarrdd';
 const CACHE_KEY = 'github_projects_cache';
 const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hora en milisegundos
 
@@ -35,7 +35,7 @@ async function fetchGitHubProjects(username) {
   try {
     const response = await fetch(endpoint, { // Realiza la solicitud a la API de GitHub
       headers: {
-        Accept: 'application/vnd.github+json', 
+        Accept: 'application/vnd.github+json',
       },
     });
     if (!response.ok) { // Si la respuesta no es exitosa
@@ -66,7 +66,7 @@ async function fetchGitHubProjects(username) {
   }
 }
 // Función para obtener los lenguajes de un repositorio
-async function fetchRepoLanguages(fullName) { 
+async function fetchRepoLanguages(fullName) {
   const endpoint = `https://api.github.com/repos/${fullName}/languages`;
   const response = await fetch(endpoint, {
     headers: {
@@ -74,7 +74,7 @@ async function fetchRepoLanguages(fullName) {
     },
   });
   if (!response.ok) return [];
-  const data = await response.json(); 
+  const data = await response.json();
   return Object.keys(data);
 }
 
@@ -95,145 +95,136 @@ function pickRepos(repos) {
   return nonForks.slice(0, 6);
 }
 // Renderiza los proyectos en el grid.
-    function renderProjects(repos) {
-      const grid = document.getElementById('projects-grid');
-      if (!grid) {
-        console.error('No se encontró el elemento projects-grid');
-        return;
-      }
-      if (!repos || repos.length === 0) {
-        grid.innerHTML = '<p class="text-white/70">No hay proyectos para mostrar.</p>';
-        return;
-      }
-      grid.innerHTML = '';
-      repos.forEach((repo) => {
-        // Recorre los repositorios y crea el HTML para cada uno.
-        const description = repo.description || 'Sin descripción';
-        const homepage = repo.homepage && repo.homepage.trim() !== '' ? repo.homepage : null;
-        const topics = Array.isArray(repo.topics) ? repo.topics : [];
-        const languages = Array.isArray(repo.languages) ? repo.languages : (repo.language ? [repo.language] : []);
-        
-        const card = document.createElement('div');
-        card.className = 'glass-effect rounded-xl border border-white/10 p-5 hover:border-primary/50 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full';
-        
-        // Crear elementos de forma segura usando métodos del DOM en lugar de innerHTML para contenido de usuario
-        const contentWrapper = document.createElement('div');
-        contentWrapper.className = 'flex flex-col gap-3 h-full';
-        
-        const title = document.createElement('h3');
-        title.className = 'text-white text-xl font-bold tracking-tight break-words';
-        title.textContent = repo.name;
-        
-        const desc = document.createElement('p');
-        desc.className = 'text-white/70 text-sm';
-        desc.textContent = description;
-        
-        const tagsContainer = document.createElement('div');
-        tagsContainer.className = 'flex flex-wrap gap-2 mt-1';
-        
-        [...languages, ...topics].slice(0, 8).forEach(t => {
-            const tag = document.createElement('span');
-            tag.className = 'px-2 py-1 rounded-full text-xs bg-white/10 text-white/80 border border-white/10';
-            tag.textContent = `#${t}`;
-            tagsContainer.appendChild(tag);
-        });
-        
-        const linksContainer = document.createElement('div');
-        linksContainer.className = 'flex items-center gap-3 mt-auto';
-        
-        const repoLink = document.createElement('a');
-        repoLink.className = 'text-primary hover:underline text-sm font-medium';
-        repoLink.href = repo.html_url;
-        repoLink.target = '_blank';
-        repoLink.rel = 'noreferrer';
-        repoLink.textContent = 'Repositorio';
-        linksContainer.appendChild(repoLink);
-        
-        if (homepage) {
-            const demoLink = document.createElement('a');
-            demoLink.className = 'text-white/80 hover:text-primary transition-colors text-sm';
-            demoLink.href = homepage;
-            demoLink.target = '_blank';
-            demoLink.rel = 'noreferrer';
-            demoLink.textContent = 'Demo';
-            linksContainer.appendChild(demoLink);
-        }
+function renderProjects(repos) {
+  const grid = document.getElementById('projects-grid');
+  if (!grid) {
+    console.error('No se encontró el elemento projects-grid');
+    return;
+  }
+  if (!repos || repos.length === 0) {
+    grid.innerHTML = '<p class="text-white/70">No hay proyectos para mostrar.</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  repos.forEach((repo) => {
+    // Recorre los repositorios y crea el HTML para cada uno.
+    const description = repo.description || 'Sin descripción';
+    const homepage = repo.homepage && repo.homepage.trim() !== '' ? repo.homepage : null;
+    const topics = Array.isArray(repo.topics) ? repo.topics : [];
+    const languages = Array.isArray(repo.languages) ? repo.languages : (repo.language ? [repo.language] : []);
 
-        contentWrapper.appendChild(title);
-        contentWrapper.appendChild(desc);
-        contentWrapper.appendChild(tagsContainer);
-        contentWrapper.appendChild(linksContainer);
-        card.appendChild(contentWrapper);
-        
-        grid.appendChild(card);
-      });
-    }
-    // Inicializa los proyectos.
-    async function initProjects() {
-      try {
-        console.log('Iniciando carga de proyectos para:', GITHUB_USERNAME);
-        
-        // Primero intentar obtener del caché
-        let enrichedRepos = getCachedData();
-        
-        if (enrichedRepos) {
-          console.log('Usando datos del caché local');
-          renderProjects(enrichedRepos);
-          return;
-        } 
-        
-        console.log('No hay datos en caché, solicitando a la API');
-        const repos = await fetchGitHubProjects(GITHUB_USERNAME);
-        
-        console.log('Repositorios obtenidos:', repos.length);
-        const selected = pickRepos(repos);
-        console.log('Repositorios seleccionados:', selected.length);
-        // Si no hay repositorios seleccionados, mostrar mensaje
-        if (selected.length === 0) {
-          const grid = document.getElementById('projects-grid');
-          if (grid) {
-            grid.innerHTML = '<p class="text-white/70">No se encontraron proyectos destacados. Verifica que los nombres en FEATURED_REPOS coincidan con tus repositorios.</p>';
-          }
-          return;
-        }
-        
-        const languagesByRepo = await Promise.all(selected.map((r) => fetchRepoLanguages(r.full_name)));
-        enrichedRepos = selected.map((r, i) => ({ ...r, languages: languagesByRepo[i] }));
-        console.log('Proyectos enriquecidos:', enrichedRepos.length);
-        
-        // Guardar en caché los datos YA ENRIQUECIDOS con lenguajes
-        setCachedData(enrichedRepos);
-        
-        renderProjects(enrichedRepos);
-      } catch (e) {
-        console.error('Error al cargar proyectos:', e);
-        const grid = document.getElementById('projects-grid');
-        if (grid) {
-          grid.innerHTML = `<p class="text-white/70">Error al cargar los proyectos: ${e.message}</p>`;
-        }
-      }
-    }
-    // Función para manejar el scroll del nav 
-    function handleNavScroll() {
-      const nav = document.getElementById('main-nav');
-      if (!nav) return;
-      
-      if (window.scrollY > 50) {
-        // Mostrar nav
-        nav.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
-      } else {
-        // Ocultar nav
-        nav.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
-      }
-    }
+    const card = document.createElement('div');
+    card.className = 'glass-effect rounded-xl border border-white/10 p-5 hover:border-primary/50 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initProjects();
-      
-      // Inicializar estado del nav
-      handleNavScroll();
-      // Agregar listener de scroll
-      window.addEventListener('scroll', handleNavScroll);
+    // Crear elementos de forma segura usando métodos del DOM en lugar de innerHTML para contenido de usuario
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'flex flex-col gap-3 h-full';
+
+    const title = document.createElement('h3');
+    title.className = 'text-white text-xl font-bold tracking-tight break-words';
+    title.textContent = repo.name;
+
+    const desc = document.createElement('p');
+    desc.className = 'text-white/70 text-sm';
+    desc.textContent = description;
+
+    const tagsContainer = document.createElement('div');
+    tagsContainer.className = 'flex flex-wrap gap-2 mt-1';
+
+    [...languages, ...topics].slice(0, 8).forEach(t => {
+      const tag = document.createElement('span');
+      tag.className = 'px-2 py-1 rounded-full text-xs bg-white/10 text-white/80 border border-white/10';
+      tag.textContent = `#${t}`;
+      tagsContainer.appendChild(tag);
     });
+
+    const linksContainer = document.createElement('div');
+    linksContainer.className = 'flex items-center gap-3 mt-auto';
+
+    const repoLink = document.createElement('a');
+    repoLink.className = 'text-primary text-sm font-medium transition-transform duration-300 hover:text-white hover:scale-110 ';
+    repoLink.href = repo.html_url;
+    repoLink.target = '_blank';
+    repoLink.rel = 'noreferrer';
+    repoLink.textContent = 'Repositorio';
+    linksContainer.appendChild(repoLink);
+
+
+    contentWrapper.appendChild(title);
+    contentWrapper.appendChild(desc);
+    contentWrapper.appendChild(tagsContainer);
+    contentWrapper.appendChild(linksContainer);
+    card.appendChild(contentWrapper);
+
+    grid.appendChild(card);
+  });
+}
+// Inicializa los proyectos.
+async function initProjects() {
+  try {
+    console.log('Iniciando carga de proyectos para:', GITHUB_USERNAME);
+
+    // Primero intentar obtener del caché
+    let enrichedRepos = getCachedData();
+
+    if (enrichedRepos) {
+      console.log('Usando datos del caché local');
+      renderProjects(enrichedRepos);
+      return;
+    }
+
+    console.log('No hay datos en caché, solicitando a la API');
+    const repos = await fetchGitHubProjects(GITHUB_USERNAME);
+
+    console.log('Repositorios obtenidos:', repos.length);
+    const selected = pickRepos(repos);
+    console.log('Repositorios seleccionados:', selected.length);
+    // Si no hay repositorios seleccionados, mostrar mensaje
+    if (selected.length === 0) {
+      const grid = document.getElementById('projects-grid');
+      if (grid) {
+        grid.innerHTML = '<p class="text-white/70">No se encontraron proyectos destacados. Verifica que los nombres en FEATURED_REPOS coincidan con tus repositorios.</p>';
+      }
+      return;
+    }
+
+    const languagesByRepo = await Promise.all(selected.map((r) => fetchRepoLanguages(r.full_name)));
+    enrichedRepos = selected.map((r, i) => ({ ...r, languages: languagesByRepo[i] }));
+    console.log('Proyectos enriquecidos:', enrichedRepos.length);
+
+    // Guardar en caché los datos YA ENRIQUECIDOS con lenguajes
+    setCachedData(enrichedRepos);
+
+    renderProjects(enrichedRepos);
+  } catch (e) {
+    console.error('Error al cargar proyectos:', e);
+    const grid = document.getElementById('projects-grid');
+    if (grid) {
+      grid.innerHTML = `<p class="text-white/70">Error al cargar los proyectos: ${e.message}</p>`;
+    }
+  }
+}
+// Función para manejar el scroll del nav 
+function handleNavScroll() {
+  const nav = document.getElementById('main-nav');
+  if (!nav) return;
+
+  if (window.scrollY > 50) {
+    // Mostrar nav
+    nav.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
+  } else {
+    // Ocultar nav
+    nav.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initProjects();
+
+  // Inicializar estado del nav
+  handleNavScroll();
+  // Agregar listener de scroll
+  window.addEventListener('scroll', handleNavScroll);
+});
 
 
