@@ -226,5 +226,3 @@ document.addEventListener('DOMContentLoaded', () => {
   // Agregar listener de scroll
   window.addEventListener('scroll', handleNavScroll);
 });
-
-

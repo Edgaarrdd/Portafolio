@@ -9,7 +9,7 @@
 }
 
 .bg-hero {
-  background-image: url('https://picsum.photos/seed/picsum/1920/1080');
+  background-image: url("./img/background/bg-site.jpg");
 }
 
 html {
