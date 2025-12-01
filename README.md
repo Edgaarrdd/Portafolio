@@ -108,4 +108,4 @@ Este proyecto está bajo la Licencia MIT. Siéntete libre de usarlo y modificarl
 
 ---
 
-Desarrollado con ❤️ por [Edgard Machuca](https://github.com/Edgaarrdd)
+Desarrollado por [Edgard Machuca](https://github.com/Edgaarrdd)

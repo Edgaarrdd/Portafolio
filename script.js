@@ -80,7 +80,7 @@ async function fetchRepoLanguages(fullName) {
 
 // Lista de repos destacados.
 const FEATURED_REPOS = [
-  'EvaluacionIOT3', 'Prueba2Django', 'ReactBootstrap'
+
 ];
 
 function pickRepos(repos) {
