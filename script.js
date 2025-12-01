@@ -30,7 +30,7 @@ function setCachedData(data) {
   }
 }
 // Función para obtener los repositorios de GitHub
-async function fetchGitHubProjects(username) {
+async function fetchGitHubProjects(username) { //async nos ayuda a esperar a que la solicitud termine
   const endpoint = `https://api.github.com/users/${username}/repos?per_page=24&sort=updated`;
   try {
     const response = await fetch(endpoint, { // Realiza la solicitud a la API de GitHub
@@ -105,7 +105,7 @@ function renderProjects(repos) {
     grid.innerHTML = '<p class="text-white/70">No hay proyectos para mostrar.</p>';
     return;
   }
-  grid.innerHTML = '';
+  grid.innerHTML = ''; // se crea vacio para luego agregar los proyectos
   repos.forEach((repo) => {
     // Recorre los repositorios y crea el HTML para cada uno.
     const description = repo.description || 'Sin descripción';
@@ -143,9 +143,12 @@ function renderProjects(repos) {
 
     const repoLink = document.createElement('a');
     repoLink.className = 'text-primary text-sm font-medium transition-transform duration-300 hover:text-white hover:scale-110 ';
-    repoLink.href = repo.html_url;
+    const safeUrl = repo.html_url && /^https?:\/\//i.test(repo.html_url) // con esto verificamos que la url sea valida
+      ? repo.html_url
+      : '#';
+    repoLink.href = safeUrl;
     repoLink.target = '_blank';
-    repoLink.rel = 'noreferrer';
+    repoLink.rel = 'noopener noreferrer';
     repoLink.textContent = 'Repositorio';
     linksContainer.appendChild(repoLink);
 
