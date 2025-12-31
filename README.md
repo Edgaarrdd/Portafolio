@@ -1,111 +1,43 @@
-# Portafolio - Edgard Machuca
+# Astro Starter Kit: Minimal
 
-Este es mi portafolio personal, diseñado para mostrar mis proyectos, habilidades y experiencia como desarrollador. Está construido con tecnologías web modernas, enfocándose en un diseño limpio, responsivo y una experiencia de usuario fluida.
-
-## 🚀 Características
-
-- **Integración con GitHub API**: Carga dinámicamente mis repositorios destacados y sus lenguajes directamente desde GitHub.
-- **Diseño Responsivo**: Adaptado para funcionar perfectamente en móviles, tablets y escritorio.
-- **Modo Oscuro**: Estética moderna con un tema oscuro ("Dark Mode") por defecto.
-- **Efectos Visuales**:
-  - Fondo personalizado con efecto Parallax.
-  - Barra de navegación con efecto "Glassmorphism" que aparece/desaparece al hacer scroll.
-  - Animaciones suaves en hover y transiciones.
-  - Iconos de habilidades con efecto de color al pasar el mouse.
-- **Optimización**: Sistema de caché local (1 hora) para minimizar las peticiones a la API de GitHub y mejorar la velocidad de carga.
-- **Tipografía Personalizada**: Uso de fuentes Google Fonts (Space Grotesk, Doto, Roboto).
-
-## 🛠 Tecnologías Utilizadas
-
-- **HTML5**: Estructura semántica y accesible.
-- **Tailwind CSS**: Framework de utilidad para el diseño y estilos (cargado vía CDN).
-- **JavaScript (Vanilla)**: Lógica para la integración con la API de GitHub, manejo del DOM y efectos de interfaz.
-- **Devicon**: Iconos de tecnologías y herramientas.
-- **Google Fonts**: Tipografías personalizadas:
-  - Space Grotesk (fuente principal)
-  - Doto (fuente de acentos)
-  - Roboto (fuente alternativa)
-
-## 📂 Estructura del Proyecto
-
-```
-.
-├── index.html          # Archivo principal HTML
-├── styles.css          # Estilos personalizados adicionales
-├── script.js           # Lógica JS (API GitHub, caché, UI interactions)
-├── tailwind-config.js  # Configuración personalizada de Tailwind
-├── img/                # Recursos de imagen
-│   └── background/     # Imágenes de fondo
-└── .vscode/            # Configuración de VS Code
-    └── settings.json   # Ajustes del editor
+```sh
+bun create astro@latest -- --template minimal
 ```
 
-## 🎨 Personalización de Tailwind
+> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
 
-El proyecto incluye una configuración personalizada de Tailwind (`tailwind-config.js`) con:
+## 🚀 Project Structure
 
-- **Colores personalizados**:
-  - `primary`: `#0062ffff` (azul vibrante)
-  - `background-light`: `#f6f7f8`
-  - `background-dark`: `#0D1117`
-- **Fuentes personalizadas**:
-  - `font-display`: Space Grotesk
-  - `font-doto`: Doto
-  - `font-roboto`: Roboto
-- **Border radius personalizados**: Para mantener consistencia en el diseño.
+Inside of your Astro project, you'll see the following folders and files:
 
-## 🔧 Instalación y Uso
+```text
+/
+├── public/
+├── src/
+│   └── pages/
+│       └── index.astro
+└── package.json
+```
 
-1. **Clonar el repositorio**:
-   ```bash
-   git clone https://github.com/Edgaarrdd/Portafolio.git
-   cd Portafolio
-   ```
+Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
 
-2. **Abrir el proyecto**:
-   Simplemente abre el archivo `index.html` en tu navegador web favorito. 
-   
-   **Recomendado**: Usa una extensión como "Live Server" en VS Code para una mejor experiencia de desarrollo con recarga automática.
+There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
 
-3. **No requiere instalación de dependencias**: 
-   Este es un proyecto 100% frontend sin dependencias de Node.js. Todo se carga vía CDN.
+Any static assets, like images, can be placed in the `public/` directory.
 
-## 📝 Personalización
+## 🧞 Commands
 
-Si deseas usar este portafolio como plantilla:
+All commands are run from the root of the project, from a terminal:
 
-1. **Configurar tu usuario de GitHub**:
-   - Edita `script.js` y cambia la constante `GITHUB_USERNAME` (línea 2) por tu usuario de GitHub.
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `bun install`             | Installs dependencies                            |
+| `bun dev`             | Starts local dev server at `localhost:4321`      |
+| `bun build`           | Build your production site to `./dist/`          |
+| `bun preview`         | Preview your build locally, before deploying     |
+| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `bun astro -- --help` | Get help using the Astro CLI                     |
 
-2. **Seleccionar tus repositorios destacados**:
-   - Actualiza la lista `FEATURED_REPOS` en `script.js` (línea 82-84) con los nombres de tus repositorios que quieras destacar.
+## 👀 Want to learn more?
 
-3. **Actualizar información personal**:
-   - Modifica el contenido en `index.html`:
-     - Sección "Sobre mí" (línea ~73)
-     - Nombre y título (línea ~56-58)
-     - Habilidades/iconos (línea ~87-117)
-     - Footer (línea ~153-167)
-
-4. **Cambiar colores y fuentes** (opcional):
-   - Edita `tailwind-config.js` para ajustar la paleta de colores y tipografías.
-
-5. **Personalizar imagen de fondo**:
-   - Reemplaza la imagen en `img/background/bg-site.jpg` con tu propia imagen.
-
-## 🌐 Despliegue
-
-Este portafolio puede ser desplegado fácilmente en:
-
-- **GitHub Pages**: Ideal para proyectos estáticos
-- **Netlify**: Despliegue automático desde Git
-- **Vercel**: Excelente para proyectos frontend
-- Cualquier hosting de archivos estáticos
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Siéntete libre de usarlo y modificarlo.
-
----
-
-Desarrollado por [Edgard Machuca](https://github.com/Edgaarrdd)
+Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

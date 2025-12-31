@@ -1,3 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0062ffff;
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #0D1117;
+  
+  --font-display: "Space Grotesk", sans-serif;
+  --font-doto: "Doto", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
+  
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+/* Custom Styles from styles.css */
 .glass-effect {
   background-color: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
@@ -9,7 +25,8 @@
 }
 
 .bg-hero {
-  background-image: url("./img/background/bg-site.jpg");
+  /* Path adjusted for Astro public folder */
+  background-image: url("/img/background/bg-site.jpg");
 }
 
 html {
@@ -23,7 +40,7 @@ body {
   padding: 0;
 }
 
-/* Evita que las secciones ancladas queden tapadas por el header sticky */
+/* Avoid sticky header overlapping anchored sections */
 section {
   scroll-margin-top: 96px;
 }
@@ -38,7 +55,7 @@ section {
   transform: translateY(-8px);
 }
 
-/* Estilos para el ícono de GitHub en el footer */
+/* Footer GitHub icon styles */
 footer a {
   display: inline-block;
 }
