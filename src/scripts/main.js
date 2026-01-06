@@ -1,225 +1,217 @@
-
 const GITHUB_USERNAME = 'Edgaarrdd';
 const CACHE_KEY = 'github_projects_cache';
-const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hora en milisegundos
+const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
 
-// Funciones de caché, para evitar sobrecargar la API de GitHub
-function getCachedData() {
-    try {
-        const cached = localStorage.getItem(CACHE_KEY); // Obtiene datos del localStorage
-        if (!cached) return null;
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp > CACHE_EXPIRY) {
-            localStorage.removeItem(CACHE_KEY); // Elimina datos del localStorage
+// --- Cache Management ---
+const Cache = {
+    get() {
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (!cached) return null;
+            const { data, timestamp } = JSON.parse(cached);
+            if (Date.now() - timestamp > CACHE_EXPIRY) {
+                localStorage.removeItem(CACHE_KEY);
+                return null;
+            }
+            return data;
+        } catch (e) {
             return null;
         }
-        return data;
-    } catch (e) {
-        return null;
+    },
+    set(data) {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+                data,
+                timestamp: Date.now(),
+            }));
+        } catch (e) {
+            console.warn('Cache storage failed:', e);
+        }
     }
-}
-// Función para guardar datos en caché
-function setCachedData(data) {
-    try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ //stringify convierte el objeto a string
-            data,
-            timestamp: Date.now(),
-        }));
-    } catch (e) {
-        console.warn('No se pudo guardar en caché:', e);
-    }
-}
-// Función para obtener los repositorios de GitHub
-async function fetchGitHubProjects(username) { //async nos ayuda a esperar a que la solicitud termine
+};
+
+// --- API Interaction ---
+async function fetchGitHubProjects(username) {
     const endpoint = `https://api.github.com/users/${username}/repos?per_page=24&sort=updated`;
-    try {
-        const response = await fetch(endpoint, { // Realiza la solicitud a la API de GitHub
-            headers: {
-                Accept: 'application/vnd.github+json',
-            },
-        });
-        if (!response.ok) { // Si la respuesta no es exitosa
-            let errorMessage = 'No se pudieron cargar los repositorios';
-            if (response.status === 404) { // Si el usuario no existe
-                errorMessage = `Usuario "${username}" no encontrado en GitHub. Verifica que el nombre de usuario sea correcto.`;
-            } else if (response.status === 403) { // Si se excede el límite de solicitudes
-                // Si hay datos en caché, los devolvemos en lugar de lanzar error
-                const cached = getCachedData();
-                if (cached) {
-                    console.warn('Límite de API alcanzado, usando datos del caché');
-                    return cached;
-                }
-                errorMessage = 'Límite de solicitudes a la API de GitHub alcanzado. Los datos se actualizarán cuando el límite se resetee (en aproximadamente 1 hora).';
-            } else {
-                errorMessage = `Error ${response.status}: ${response.statusText}`;
-            }
-            throw new Error(errorMessage);
-        }
-        const data = await response.json();
-        // Guardar en caché se hace después de enriquecer con lenguajes
-        return data;
-    } catch (error) {
-        if (error.message) {
-            throw error;
-        }
-        throw new Error(`Error de red: ${error.message || 'No se pudo conectar con GitHub'}`);
-    }
-}
-// Función para obtener los lenguajes de un repositorio
-async function fetchRepoLanguages(fullName) {
-    const endpoint = `https://api.github.com/repos/${fullName}/languages`;
     const response = await fetch(endpoint, {
-        headers: {
-            Accept: 'application/vnd.github+json',
-        },
+        headers: { Accept: 'application/vnd.github+json' },
     });
-    if (!response.ok) return [];
-    const data = await response.json();
-    return Object.keys(data); // object.keys() devuelve un array con las claves del objeto
-}
 
-// Lista de repos destacados.
-const FEATURED_REPOS = [
-
-];
-
-function pickRepos(repos) {
-    const nonForks = repos.filter((r) => !r.fork);
-    if (FEATURED_REPOS.length > 0) {
-        const byName = new Map(nonForks.map((r) => [r.name.toLowerCase(), r]));
-        const selected = FEATURED_REPOS
-            .map((name) => byName.get(String(name).toLowerCase()))
-            .filter(Boolean);
-        return selected.slice(0, 5);
+    if (!response.ok) {
+        if (response.status === 404) throw new Error(`User "${username}" not found.`);
+        if (response.status === 403) {
+            const cached = Cache.get();
+            if (cached) {
+                console.warn('API limit reached, using cached data.');
+                return cached;
+            }
+            throw new Error('API rate limit reached.');
+        }
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
-    return nonForks.slice(0, 6);
+    return response.json();
 }
-// Renderiza los proyectos en el grid.
+
+async function fetchRepoLanguages(fullName) {
+    try {
+        const response = await fetch(`https://api.github.com/repos/${fullName}/languages`, {
+            headers: { Accept: 'application/vnd.github+json' },
+        });
+        if (!response.ok) return [];
+        const data = await response.json();
+        return Object.keys(data);
+    } catch {
+        return [];
+    }
+}
+
+// --- Logic ---
+function pickRepos(repos) {
+    // Simply pick the first 6 non-fork repositories
+    return repos.filter((r) => !r.fork).slice(0, 6);
+}
+
 function renderProjects(repos) {
     const grid = document.getElementById('projects-grid');
-    if (!grid) {
-        // Silent fail or retry might be needed if DOM elements update dynamically, but here it's static structure
-        return;
-    }
+    if (!grid) return;
+
     if (!repos || repos.length === 0) {
-        grid.innerHTML = '<p class="text-white/70">No hay proyectos para mostrar.</p>';
+        grid.innerHTML = '<p class="text-white/70">No projects to display.</p>';
         return;
     }
-    grid.innerHTML = ''; // se crea vacio para luego agregar los proyectos
+
+    grid.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
     repos.forEach((repo) => {
-        // Recorre los repositorios y crea el HTML para cada uno.
-        const description = repo.description || 'Sin descripción';
-        const homepage = repo.homepage && repo.homepage.trim() !== '' ? repo.homepage : null;
-        const topics = Array.isArray(repo.topics) ? repo.topics : [];
         const languages = Array.isArray(repo.languages) ? repo.languages : (repo.language ? [repo.language] : []);
+        const topics = Array.isArray(repo.topics) ? repo.topics : [];
+        const tags = [...languages, ...topics].slice(0, 8);
 
         const card = document.createElement('div');
         card.className = 'glass-effect rounded-xl border border-white/10 p-5 hover:border-primary/50 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full';
 
-        // Crear elementos de forma segura usando métodos del DOM en lugar de innerHTML para contenido de usuario
-        const contentWrapper = document.createElement('div');
-        contentWrapper.className = 'flex flex-col gap-3 h-full';
+        const tagsHtml = tags.map(t =>
+            `<span class="px-2 py-1 rounded-full text-xs bg-white/10 text-white/80 border border-white/10">#${t}</span>`
+        ).join('');
 
-        const title = document.createElement('h3');
-        title.className = 'text-white text-xl font-bold tracking-tight break-words';
-        title.textContent = repo.name;
+        const safeUrl = repo.html_url && /^https?:\/\//i.test(repo.html_url) ? repo.html_url : '#';
 
-        const desc = document.createElement('p');
-        desc.className = 'text-white/70 text-sm';
-        desc.textContent = description;
-
-        const tagsContainer = document.createElement('div');
-        tagsContainer.className = 'flex flex-wrap gap-2 mt-1';
-
-        [...languages, ...topics].slice(0, 8).forEach(t => {
-            const tag = document.createElement('span');
-            tag.className = 'px-2 py-1 rounded-full text-xs bg-white/10 text-white/80 border border-white/10';
-            tag.textContent = `#${t}`;
-            tagsContainer.appendChild(tag);
-        });
-
-        const linksContainer = document.createElement('div');
-        linksContainer.className = 'flex items-center gap-3 mt-auto';
-
-        const repoLink = document.createElement('a');
-        repoLink.className = 'text-primary text-sm font-medium transition-transform duration-300 hover:text-white hover:scale-110 ';
-        const safeUrl = repo.html_url && /^https?:\/\//i.test(repo.html_url) // con esto verificamos que la url sea valida
-            ? repo.html_url
-            : '#';
-        repoLink.href = safeUrl;
-        repoLink.target = '_blank';
-        repoLink.rel = 'noopener noreferrer';
-        repoLink.textContent = 'Repositorio';
-        linksContainer.appendChild(repoLink);
-
-
-        contentWrapper.appendChild(title);
-        contentWrapper.appendChild(desc);
-        contentWrapper.appendChild(tagsContainer);
-        contentWrapper.appendChild(linksContainer);
-        card.appendChild(contentWrapper);
-
-        grid.appendChild(card);
+        card.innerHTML = `
+            <div class="flex flex-col gap-3 h-full">
+                <h3 class="text-white text-xl font-bold tracking-tight break-all">${repo.name}</h3>
+                <p class="text-white/70 text-sm">${repo.description || 'No description'}</p>
+                <div class="flex flex-wrap gap-2 mt-1">${tagsHtml}</div>
+                <div class="flex items-center gap-3 mt-auto">
+                    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" 
+                       class="text-primary text-sm font-medium transition-transform duration-300 hover:text-white hover:scale-110">
+                       Repositorio
+                    </a>
+                </div>
+            </div>
+        `;
+        fragment.appendChild(card);
     });
+    grid.appendChild(fragment);
 }
-// Inicializa los proyectos.
+
 async function initProjects() {
     try {
-        console.log('Iniciando carga de proyectos para:', GITHUB_USERNAME);
-
-        // Primero intentar obtener del caché
-        let enrichedRepos = getCachedData();
-
+        let enrichedRepos = Cache.get();
         if (enrichedRepos) {
-            console.log('Usando datos del caché local');
             renderProjects(enrichedRepos);
             return;
         }
 
-        console.log('No hay datos en caché, solicitando a la API');
         const repos = await fetchGitHubProjects(GITHUB_USERNAME);
-
-        console.log('Repositorios obtenidos:', repos.length);
         const selected = pickRepos(repos);
-        console.log('Repositorios seleccionados:', selected.length);
-        // Si no hay repositorios seleccionados, mostrar mensaje
+
         if (selected.length === 0) {
             const grid = document.getElementById('projects-grid');
-            if (grid) {
-                grid.innerHTML = '<p class="text-white/70">No se encontraron proyectos destacados. Verifica que los nombres en FEATURED_REPOS coincidan con tus repositorios.</p>';
-            }
+            if (grid) grid.innerHTML = '<p class="text-white/70">No matching projects found.</p>';
             return;
         }
 
-        const languagesByRepo = await Promise.all(selected.map((r) => fetchRepoLanguages(r.full_name)));
+        // Parallel language fetching
+        const languagesByRepo = await Promise.all(selected.map(r => fetchRepoLanguages(r.full_name)));
         enrichedRepos = selected.map((r, i) => ({ ...r, languages: languagesByRepo[i] }));
-        console.log('Proyectos enriquecidos:', enrichedRepos.length);
 
-        // Guardar en caché los datos YA ENRIQUECIDOS con lenguajes
-        setCachedData(enrichedRepos);
-
+        Cache.set(enrichedRepos);
         renderProjects(enrichedRepos);
     } catch (e) {
-        console.error('Error al cargar proyectos:', e);
+        console.error('Project load failed:', e);
         const grid = document.getElementById('projects-grid');
-        if (grid) {
-            grid.innerHTML = `<p class="text-white/70">Error al cargar los proyectos: ${e.message}</p>`;
-        }
+        if (grid) grid.innerHTML = `<p class="text-white/70">Error loading projects: ${e.message}</p>`;
     }
 }
-// Función para manejar el scroll del nav 
+
+// --- Nav Animation ---
+const MAX_SCROLL = 600;
+let navElement = null;
+
 function handleNavScroll() {
-    const nav = document.getElementById('main-nav');
-    if (!nav) return;
+    if (!navElement) {
+        navElement = document.getElementById('main-nav');
+        if (!navElement) return;
+    }
 
-    // Selecciona el método 'add' si window.scrollY <= 50, o 'remove' si no
-    const action = window.scrollY <= 50 ? 'add' : 'remove';
+    const currentScroll = Math.min(window.scrollY, MAX_SCROLL);
+    const progress = currentScroll / MAX_SCROLL; // 0 to 1
 
-    // Aplica el método seleccionado (add o remove) a la lista de clases
-    nav.classList[action]('opacity-0', '-translate-y-full', 'pointer-events-none');
+    // Initialize dimensions on first run or after reset
+    if (!navElement.dataset.initialWidth) {
+        navElement.dataset.initialWidth = String(navElement.offsetWidth);
+
+        // Temporarily apply fit-content to measure min width
+        const originalWidth = navElement.style.width;
+        navElement.style.width = 'fit-content';
+        navElement.dataset.minWidth = String(navElement.offsetWidth);
+        navElement.style.width = originalWidth; // Restore
+    }
+
+    const maxW = parseFloat(navElement.dataset.initialWidth);
+    const minW = parseFloat(navElement.dataset.minWidth);
+
+    // 1. Width
+    const newWidth = maxW - (progress * (maxW - minW));
+    navElement.style.width = `${newWidth}px`;
+
+    // 2. Background Opacity (0.05 -> 0.9)
+    const bgOpacity = 0.05 + (progress * 0.85);
+    navElement.style.backgroundColor = `rgba(255, 255, 255, ${bgOpacity})`;
+
+    // 3. Backdrop Blur
+    navElement.style.backdropFilter = `blur(${12 + (progress * 4)}px)`;
+
+    // 4. Border Color (White/10 -> Black/10)
+    const shade = Math.round(255 * (1 - progress));
+    navElement.style.borderColor = `rgba(${shade}, ${shade}, ${shade}, 0.1)`;
+
+    // 5. Text Color (White -> Black)
+    navElement.style.setProperty('--nav-text-color', `rgb(${shade}, ${shade}, ${shade})`);
 }
 
-// Iniciar
+// Optimization: use requestAnimationFrame for scroll events
+let ticking = false;
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            handleNavScroll();
+            ticking = false;
+        });
+        ticking = true;
+    }
+});
+
+window.addEventListener('resize', () => {
+    if (navElement) {
+        delete navElement.dataset.initialWidth;
+        delete navElement.dataset.minWidth;
+        navElement.style.width = '';
+        handleNavScroll();
+    }
+});
+
+// Start
 initProjects();
 handleNavScroll();
-window.addEventListener('scroll', handleNavScroll);
