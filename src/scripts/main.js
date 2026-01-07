@@ -85,29 +85,63 @@ function renderProjects(repos) {
 
     repos.forEach((repo) => {
         const languages = Array.isArray(repo.languages) ? repo.languages : (repo.language ? [repo.language] : []);
-        const topics = Array.isArray(repo.topics) ? repo.topics : [];
-        const tags = [...languages, ...topics].slice(0, 8);
+        const lastUpdated = new Date(repo.updated_at).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
 
-        const card = document.createElement('div');
-        card.className = 'glass-effect rounded-xl border border-white/10 p-5 hover:border-primary/50 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full';
-
-        const tagsHtml = tags.map(t =>
-            `<span class="px-2 py-1 rounded-full text-xs bg-white/10 text-white/80 border border-white/10">#${t}</span>`
-        ).join('');
+        // Card wrapper
+        const card = document.createElement('article');
+        card.className = 'group relative w-full h-[350px] rounded-xl shadow-lg overflow-hidden border border-white/10 bg-[#0D1117]';
 
         const safeUrl = repo.html_url && /^https?:\/\//i.test(repo.html_url) ? repo.html_url : '#';
 
         card.innerHTML = `
-            <div class="flex flex-col gap-3 h-full">
-                <h3 class="text-white text-xl font-bold tracking-tight break-all">${repo.name}</h3>
-                <p class="text-white/70 text-sm">${repo.description || 'No description'}</p>
-                <div class="flex flex-wrap gap-2 mt-1">${tagsHtml}</div>
-                <div class="flex items-center gap-3 mt-auto">
-                    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" 
-                       class="text-primary text-sm font-medium transition-transform duration-300 hover:text-white hover:scale-110">
-                       Repositorio
-                    </a>
-                </div>
+            <!-- Cover Image / Gradient Area (Height 260px) -->
+            <div class="h-[260px] w-full bg-linear-to-br from-primary/30 via-background-dark to-background-dark flex items-center justify-center">
+                 <!-- Optional: Icon or Abstract Pattern in background -->
+                 <div class="opacity-30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+                    </svg>
+                 </div>
+            </div>
+            
+            <!-- Sliding Content (Height 350px) -->
+            <div class="bg-background-dark/95 backdrop-blur-md w-full h-[350px] p-6 absolute top-[260px] left-0 transition-transform duration-500 ease-[cubic-bezier(0.17,0.67,0.5,1.03)] group-hover:-translate-y-[260px]">
+              
+              <!-- Title (Always Visible) -->
+              <h2 class="relative mb-1 text-white text-lg font-bold tracking-tight truncate">
+                ${repo.name}
+                <!-- Language Flag/Indicator -->
+                <span class="absolute top-1/2 right-0 -translate-y-1/2 text-xs font-normal text-primary/80 bg-primary/10 px-2 py-0.5 rounded">
+                    ${languages[0] || 'Code'}
+                </span>
+              </h2>
+              
+              <!-- Subtitle (Always Visible) -->
+              <h3 class="mb-4 text-white/60 text-xs font-medium">
+                Updated: ${lastUpdated}
+              </h3>
+              
+              <!-- Hidden Content (Reveals on Hover) -->
+              <div class="opacity-0 transition-opacity duration-500 delay-200 group-hover:opacity-100 flex flex-col h-[230px]">
+                  
+                  <!-- Stats Row -->
+                  <h3 class="mb-4 pb-4 border-b border-white/10 text-white/50 text-xs flex items-center justify-between">
+                    <span>Stars: ${repo.stargazers_count}</span>
+                    <span>Forks: ${repo.forks_count}</span>
+                  </h3>
+                  
+                  <!-- Description -->
+                  <p class="text-white/80 text-sm leading-relaxed mb-4 line-clamp-4">
+                    ${repo.description || 'Sin descripción disponible.'}
+                  </p>
+                  
+                  <!-- Link Button -->
+                  <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" 
+                     class="mt-auto inline-block text-primary text-sm font-bold hover:text-white transition-colors">
+                    Ver Repositorio &rarr;
+                  </a>
+              </div>
+              
             </div>
         `;
         fragment.appendChild(card);

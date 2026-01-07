@@ -4,11 +4,11 @@
   --color-primary: #0062ffff;
   --color-background-light: #f6f7f8;
   --color-background-dark: #0D1117;
-  
+
   --font-display: "Space Grotesk", sans-serif;
   --font-doto: "Doto", sans-serif;
   --font-roboto: "Roboto", sans-serif;
-  
+
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
 }
@@ -26,7 +26,7 @@
 
 .bg-hero {
   /* Path adjusted for Astro public folder */
-  background-image: url("/img/background/bg-site.jpg");
+  background-image: url("/img/background/papel.png");
 }
 
 html {
