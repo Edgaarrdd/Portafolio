@@ -178,7 +178,7 @@ import Layout from "../layouts/Layout.astro";
             class="w-full glass-effect rounded-xl border border-white/10 p-8 md:p-12"
           >
             <div class="max-w-xl mx-auto text-center">
-              <h2 class="text-white text-3xl font-bold tracking-tight">
+              <h2 id="contact-heading" class="text-white text-3xl font-bold tracking-tight">
                 Dame Trabajo.
               </h2>
               <p class="text-white/70 mt-3">
@@ -186,23 +186,46 @@ import Layout from "../layouts/Layout.astro";
                 contactarme.
               </p>
             </div>
-            <form class="max-w-xl mx-auto mt-8 space-y-4">
+            <form class="max-w-xl mx-auto mt-8 space-y-4" action="#" method="POST" aria-labelledby="contact-heading">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input
-                  class="w-full bg-black/30 text-white p-4 rounded-lg border border-white/20 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  placeholder="Tu Nombre"
-                  type="text"
-                />
-                <input
-                  class="w-full bg-black/30 text-white p-4 rounded-lg border border-white/20 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  placeholder="Tu Email"
-                  type="email"
-                />
+                <div class="flex flex-col gap-1 text-left">
+                  <label for="contact-name" class="text-xs font-medium text-white/70">Tu Nombre</label>
+                  <input
+                    id="contact-name"
+                    name="name"
+                    autocomplete="name"
+                    required
+                    class="w-full bg-black/30 text-white p-4 rounded-lg border border-white/20 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                    placeholder="Tu Nombre"
+                    type="text"
+                  />
+                </div>
+                <div class="flex flex-col gap-1 text-left">
+                  <label for="contact-email" class="text-xs font-medium text-white/70">Tu Email</label>
+                  <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    required
+                    class="w-full bg-black/30 text-white p-4 rounded-lg border border-white/20 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                    placeholder="Tu Email"
+                  />
+                </div>
               </div>
-              <textarea
-                class="w-full bg-black/30 text-white p-4 rounded-lg border border-white/20 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                placeholder="Tu Mensaje"
-                rows="5"></textarea>
+              <div class="flex flex-col gap-1 text-left">
+                <label for="contact-message" class="text-xs font-medium text-white/70">Tu Mensaje</label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  required
+                  rows="5"
+                  class="w-full bg-black/30 text-white p-4 rounded-lg border border-white/20 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  placeholder="Tu Mensaje"></textarea>
+              </div>
               <button
                 class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold tracking-wide hover:bg-primary/90 transition-colors"
                 type="submit"

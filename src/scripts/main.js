@@ -76,11 +76,14 @@ function renderProjects(repos) {
     if (!grid) return;
 
     if (!repos || repos.length === 0) {
-        grid.innerHTML = '<p class="text-white/70">No projects to display.</p>';
+        const msg = document.createElement('p');
+        msg.className = 'text-white/70';
+        msg.textContent = 'No projects to display.';
+        grid.replaceChildren(msg);
         return;
     }
 
-    grid.innerHTML = '';
+    grid.replaceChildren();
     const fragment = document.createDocumentFragment();
 
     repos.forEach((repo) => {
@@ -162,7 +165,12 @@ async function initProjects() {
 
         if (selected.length === 0) {
             const grid = document.getElementById('projects-grid');
-            if (grid) grid.innerHTML = '<p class="text-white/70">No matching projects found.</p>';
+            if (grid) {
+                const msg = document.createElement('p');
+                msg.className = 'text-white/70';
+                msg.textContent = 'No matching projects found.';
+                grid.replaceChildren(msg);
+            }
             return;
         }
 
@@ -175,7 +183,12 @@ async function initProjects() {
     } catch (e) {
         console.error('Project load failed:', e);
         const grid = document.getElementById('projects-grid');
-        if (grid) grid.innerHTML = `<p class="text-white/70">Error loading projects: ${e.message}</p>`;
+        if (grid) {
+            const msg = document.createElement('p');
+            msg.className = 'text-white/70';
+            msg.textContent = `Error loading projects: ${e.message}`;
+            grid.replaceChildren(msg);
+        }
     }
 }
 
